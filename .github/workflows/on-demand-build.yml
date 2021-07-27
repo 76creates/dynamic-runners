@@ -72,6 +72,11 @@ jobs:
             cloud-init="@$(pwd)/cloud_init.sh" | jq -r .id
         )
 
+        # TODO: better error handling
+        [ -z $SERVER_ID ] &&
+        echo "::error::failed to spawn an server" && 
+        exit 1
+
         for retry in {1..16}; do
           STATE=$(./scw instance server get -o json ${SERVER_ID} | jq -r .state)
            [ $STATE == "running" ] && 
