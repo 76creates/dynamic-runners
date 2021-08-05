@@ -5,7 +5,36 @@ on:
   pull_request:
 
 jobs:
+  get-current-workflow:
+    # here we try to extract workflow path of the current workflow
+    # thing is that only info that we have within this context
+    # is workflow name if available, or the workflow relative path
+    # if no name is provided
+    # unlike workflow_run context this has to run like this
+    runs-on: ubuntu-last
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Get workflow file
+      id: workflow-file
+      run: |
+        if [[ "${{ startsWith(github.workflow, './github/workflows/') }}" == "true" ]] &&
+          echo "::set-output name=workflow::${{ github.workflow }}" && exit 0
+        
+        WORKFLOW_FILE=$(grep -o '^name: ${{ github.workflow }}' * | cut -d: -f1)
+        if [[ $(wc -w <<< $WORKFLOW_FILE) == 0 ]] &&
+          echo "::error::workflow not found" && exit 1
+
+        if [[ $(wc -w <<< $WORKFLOW_FILE) > 1 ]] &&
+          echo "::error::multiple workloads found" && echo "::warning::$WORKFLOW_FILE" && exit 1
+
+        echo "::set-output name=workflow::./github/workflows/${{ github.workflow }}"
+    outputs:
+      workflow: ${{ steps.workflow-file.outputs.workflow }}
+
   generate-job-matrix:
+    needs: get-current-workflow
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
@@ -15,7 +44,7 @@ jobs:
       id: job-matrix
       run: |
         JOBS=$(
-          yq e -j ${{ github.event.workflow.path }} | 
+          yq e -j ${{ needs.get-current-workflow.outputs.workflow }} | 
           jq '
             .jobs | 
             to_entries[] | 
