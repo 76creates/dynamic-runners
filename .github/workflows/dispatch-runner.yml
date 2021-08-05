@@ -41,8 +41,9 @@ jobs:
   spawn-runner:
     needs: generate-job-matrix
     runs-on: ubuntu-latest
-    matrix:
-      job: ${{ fromJson(needs.generate-job-matrix.outputs.jobs) }}
+    strategy:
+      matrix:
+        job: ${{ fromJson(needs.generate-job-matrix.outputs.jobs) }}
 
     steps:
     - name: build SDK
