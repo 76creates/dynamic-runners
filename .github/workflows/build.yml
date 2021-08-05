@@ -22,7 +22,7 @@ jobs:
         [[ "${{ startsWith(github.workflow, './github/workflows/') }}" == "true" ]] &&
           echo "::set-output name=workflow::${{ github.workflow }}" && exit 0
         
-        WORKFLOW_FILE=$(grep -o '^name: ${{ github.workflow }}' * | cut -d: -f1)
+        WORKFLOW_FILE=$(grep -o '^name: ${{ github.workflow }}' .github/workflows/* | cut -d: -f1)
         [[ $(wc -w <<< $WORKFLOW_FILE) == 0 ]] &&
           echo "::error::workflow not found" && exit 1
 
