@@ -8,6 +8,14 @@ on:
       - requested
 
 jobs:
+  print-context:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dump GitHub context
+        env:
+          GITHUB_CONTEXT: ${{ toJSON(github) }}
+        run: echo "$GITHUB_CONTEXT"
+
   generate-job-matrix:
     if: ${{ github.event.action == 'requested' }}
 
@@ -25,7 +33,7 @@ jobs:
             .jobs | 
             to_entries[] | 
             if 
-              (.value."runs-on" == "${{ github.run_id }}") 
+              (.value."runs-on" | contains("github.run_id")) 
             then 
               "${{ github.event.workflow_run.id }}"
             else 
@@ -33,6 +41,7 @@ jobs:
             end' | 
           jq --slurp -c
         )
+        echo $JOBS
         echo "::set-output name=jobs::$JOBS"
 
     outputs:
