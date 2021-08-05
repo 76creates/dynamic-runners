@@ -1,16 +1,18 @@
 name: Dispatch Runner
 on:
   workflow_run:
-    workflows: ["Build"]
+    types: 
+      - completed
+      - requested
 
 jobs:
   print-context:
     runs-on: ubuntu-latest
     steps:
     - run: echo ${{ github }}
-    
+
   generate-job-matrix:
-    if: github.event.action == created
+    if: github.event.action == requested
 
     runs-on: ubuntu-latest
     steps:
