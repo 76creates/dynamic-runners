@@ -35,7 +35,7 @@ jobs:
             if 
               (.value."runs-on" | contains("github.run_id")) 
             then 
-              "${{ github.event.workflow_run.id }}"
+              "${{ github.event.workflow_run.id }}-\(.key)"
             else 
               empty 
             end' | 

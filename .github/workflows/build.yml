@@ -5,21 +5,76 @@ on:
   pull_request:
 
 jobs:
-  wait-for-runners:
+  generate-job-matrix:
+    if: ${{ github.event.action == 'requested' }}
+
     runs-on: ubuntu-latest
     steps:
-    - name: print context
-      env:
-        GITHUB_CONTEXT: ${{ toJSON(github) }}
-      run: echo "$GITHUB_CONTEXT"
+    - name: Checkout
+      uses: actions/checkout@v2
 
-    - name: Sleep for 3 minutes
+    - name: generate matrix
+      id: job-matrix
       run: |
-        echo ${{ github }}
-        sleep 180
+        JOBS=$(
+          yq e -j ${{ github.event.workflow.path }} | 
+          jq '
+            .jobs | 
+            to_entries[] | 
+            if 
+              (.value."runs-on" | contains("github.run_id")) 
+            then 
+              "${{ github.event.workflow_run.id }}-\(.key)-"
+            else 
+              empty 
+            end' | 
+          jq --slurp -c
+        )
+        echo $JOBS
+        echo "::set-output name=jobs::$JOBS"
+
+    outputs:
+      jobs: ${{ steps.job-matrix.outputs.jobs }}
+
+  wait-for-runners:
+    needs: generate-job-matrix
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        job: ${{ fromJson(needs.generate-job-matrix.outputs.jobs) }}
+        
+    steps:
+    - name: wait for runner labels to become availible
+      uses: actions/github-script@v4
+      with:
+        github-token: ${{ secrets.RUNNER_ACCESS_TOKEN }}
+        script: |
+          const sleep = m => new Promise(r => setTimeout(r, m));
+
+          // get runner ID with a retry 
+          const getRunner = async iter => {
+            let runnersObj = await github.request('GET /repos/{owner}/{repo}/actions/runners', {
+              owner: '${{ github.repository_owner }}',
+              repo: '${{ github.event.repository.name }}'
+            });
+            runner = runnersObj.data.runners.find(obj => { return obj.name === "${{ matrix.job }}" });
+            if (runner) {
+              return 0;
+            } else {
+              await sleep(20000)
+              if (--iter) {
+                return await getRunner(iter);
+              } else {
+                return 1;
+              }
+            };
+          }
+
+          await getRunner(15);
 
   run-on-demand:
-    runs-on: "${{ github.run_id }}"
+    needs: wait-for-runners
+    runs-on: "${{ github.run_id }}-run-on-demand"
 
     steps:
     - name: Run on on-demand runner
