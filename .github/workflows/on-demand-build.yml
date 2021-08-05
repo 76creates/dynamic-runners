@@ -5,7 +5,6 @@ on:
 
 jobs:
   run-on-demand:
-    needs: spawn
     runs-on: "${{ github.run_id }}-${{ github.job }}"
 
     steps:
