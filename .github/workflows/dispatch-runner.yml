@@ -23,9 +23,9 @@ jobs:
             .jobs | 
             to_entries[] | 
             if 
-              (.value."runs-on" == "${{ github.run_id }}-${{ github.job }}") 
+              (.value."runs-on" == "${{ github.run_id }}") 
             then 
-              .key 
+              "${{ github.event.workflow_run.id }}"
             else 
               empty 
             end' | 

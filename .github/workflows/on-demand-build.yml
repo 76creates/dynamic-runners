@@ -5,7 +5,7 @@ on:
 
 jobs:
   run-on-demand:
-    runs-on: "${{ github.run_id }}-${{ github.job }}"
+    runs-on: "${{ github.run_id }}"
 
     steps:
     - name: Run on on-demand runner
