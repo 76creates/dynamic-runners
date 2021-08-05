@@ -11,7 +11,7 @@ jobs:
     # is workflow name if available, or the workflow relative path
     # if no name is provided
     # unlike workflow_run context this has to run like this
-    runs-on: ubuntu-last
+    runs-on: ubuntu-latest
     steps:
     - name: Checkout
       uses: actions/checkout@v2
