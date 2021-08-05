@@ -6,8 +6,6 @@ on:
 
 jobs:
   generate-job-matrix:
-    if: ${{ github.event.action == 'requested' }}
-
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
@@ -42,7 +40,7 @@ jobs:
     strategy:
       matrix:
         job: ${{ fromJson(needs.generate-job-matrix.outputs.jobs) }}
-        
+
     steps:
     - name: wait for runner labels to become availible
       uses: actions/github-script@v4
