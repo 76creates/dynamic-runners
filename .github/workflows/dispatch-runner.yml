@@ -4,6 +4,11 @@ on:
     workflows: ["Build"]
 
 jobs:
+  print-context:
+    runs-on: ubuntu-latest
+    steps:
+    - run: echo ${{ github }}
+    
   generate-job-matrix:
     if: github.event.action == created
 
