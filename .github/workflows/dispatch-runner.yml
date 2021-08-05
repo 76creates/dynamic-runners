@@ -9,7 +9,7 @@ on:
 
 jobs:
   generate-job-matrix:
-    if: github.event.action == requested
+    if: github.event.action == "requested"
 
     runs-on: ubuntu-latest
     steps:
