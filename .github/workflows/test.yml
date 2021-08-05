@@ -1,0 +1,18 @@
+name: Run
+
+on:
+  workflow_run:
+    workflows: ["Build"]
+    types: 
+      - completed
+      - requested
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Display context
+        run: |
+          cat << EOF
+          ${{ toJSON(github) }}
+          EOF
