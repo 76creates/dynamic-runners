@@ -13,16 +13,16 @@ jobs:
         GITHUB_CONTEXT: ${{ toJSON(github) }}
       run: echo "$GITHUB_CONTEXT"
 
-    # - name: Sleep for 3 minutes
-    #   run: |
-    #     echo ${{ github }}
-    #     sleep 180
+    - name: Sleep for 3 minutes
+      run: |
+        echo ${{ github }}
+        sleep 180
 
-  # run-on-demand:
-  #   runs-on: "${{ github.run_id }}"
+  run-on-demand:
+    runs-on: "${{ github.run_id }}"
 
-  #   steps:
-  #   - name: Run on on-demand runner
-  #     run: |
-  #       hostname
-  #       echo "this is on-demand runner"
+    steps:
+    - name: Run on on-demand runner
+      run: |
+        hostname
+        echo "this is on-demand runner"
