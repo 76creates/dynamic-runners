@@ -29,8 +29,8 @@ jobs:
         [[ $(wc -w <<< $WORKFLOW_FILE) > 1 ]] &&
           echo "::error::multiple workloads found" && echo "::warning::$WORKFLOW_FILE" && exit 1
           
-        echo "./github/workflows/$WORKFLOW_FILE"
-        echo "::set-output name=workflow::./github/workflows/$WORKFLOW_FILE"
+        echo "$WORKFLOW_FILE"
+        echo "::set-output name=workflow::$WORKFLOW_FILE"
     outputs:
       workflow: ${{ steps.workflow-file.outputs.workflow }}
 
