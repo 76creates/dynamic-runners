@@ -2,12 +2,11 @@ name: Dispatch Runner
 on:
   workflow_run:
     workflows: ["Build"]
-    types: 
-      - requested
 
 jobs:
-
   generate-job-matrix:
+    if: github.event.action == created
+
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
