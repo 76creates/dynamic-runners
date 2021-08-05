@@ -1,11 +1,48 @@
-name: Spawn
-
+name: Dispatch Runner
 on:
-  push:
+  workflow_run:
+    workflows:
+      - Build
+    types: 
+      - completed
+      - requested
 
 jobs:
-  spawn:
+  generate-job-matrix:
+    if: github.event.action == requested
+
     runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: generate matrix
+      id: job-matrix
+      run: |
+        JOBS=$(
+          yq e -j ${{ github.event.workflow.path }} | 
+          jq '
+            .jobs | 
+            to_entries[] | 
+            if 
+              (.value."runs-on" == "${{ github.run_id }}") 
+            then 
+              "${{ github.event.workflow_run.id }}"
+            else 
+              empty 
+            end' | 
+          jq --slurp -c
+        )
+        echo "::set-output name=jobs::$JOBS"
+
+    outputs:
+      jobs: ${{ steps.job-matrix.outputs.jobs }}
+
+  spawn-runner:
+    needs: generate-job-matrix
+    runs-on: ubuntu-latest
+    matrix:
+      job: ${{ fromJson(needs.generate-job-matrix.outputs.jobs) }}
 
     steps:
     - name: build SDK
@@ -16,7 +53,7 @@ jobs:
     - name: setup go
       uses: actions/setup-go@v2
       with:
-        go-version: '1.16.4' # The Go version to download (if necessary) and use.
+        go-version: '1.16.4'
       
       # we do this to bypass the issue https://github.com/scaleway/scaleway-cli/commit/3c87ff393104386e50542dad1b1c90c80c49cfa5
     - name: make scw cli
@@ -43,8 +80,8 @@ jobs:
         #!/usr/bin/bash
         sudo --user=gitrun /home/gitrun/actions-runner/config.sh \
         --url https://github.com/${{ github.repository }} \
-        --name ${{ github.sha }} \
-        --labels on-demand,${{ github.sha }} \
+        --name ${{ matrix.job }} \
+        --labels on-demand,${{ matrix.job }} \
         --work _work \
         --token ${{ steps.runner.outputs.result }}
         
@@ -63,7 +100,7 @@ jobs:
         export SCW_DEFAULT_ZONE=nl-ams-1
         SERVER_ID=$(
           ./scw instance server create -o json \
-            name=${{ github.sha }} \
+            name=${{ matrix.job }} \
             type=STARDUST1-S \
             root-volume=l:10G \
             ip=new \
@@ -100,7 +137,7 @@ jobs:
               owner: '${{ github.repository_owner }}',
               repo: 'dynamic-runners'
             });
-            runner = runnersObj.data.runners.find(obj => { return obj.name === "${{ github.sha }}" });
+            runner = runnersObj.data.runners.find(obj => { return obj.name === "${{ matrix.job }}" });
             if (runner) {
               return runner;
             } else {
@@ -117,8 +154,8 @@ jobs:
                   repo: 'dynamic-runners',
                   runner_id: id
               });
-              if (runner.data.status == "offline"){
-                  console.log(`::warning::runner id '${runnerId}' is offline`);
+              if (runner.data.status != "online"){
+                  console.log(`::warning::runner id '${runnerId}' is '${runner.data.status}'`);
                   if (--iter) {
                     await checkRunnerState(iter, id);
                   } else {
@@ -134,13 +171,3 @@ jobs:
           console.log("successfully fetched the id")
 
           return await checkRunnerState(10, runnerId);
-
-  run-on-demand:
-    needs: spawn
-    runs-on: ${{ github.sha }}
-
-    steps:
-    - name: Run on on-demand runner
-      run: |
-        hostname
-        echo "this is on-demand runner"
