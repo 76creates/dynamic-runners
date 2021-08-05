@@ -8,12 +8,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: print context
-      run: |
-        echo ${{ toJSON(github) }}
+      env:
+        GITHUB_CONTEXT: ${{ toJSON(github) }}
+      run: echo "$GITHUB_CONTEXT"
+
     - name: Sleep for 3 minutes
       run: |
         echo ${{ github }}
         sleep 180
+        
   run-on-demand:
     runs-on: "${{ github.run_id }}"
 
