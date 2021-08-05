@@ -8,7 +8,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Sleep for 3 minutes
-      run: sleep 180
+      run: |
+        echo ${{ github }}
+        sleep 180
   run-on-demand:
     runs-on: "${{ github.run_id }}"
 
