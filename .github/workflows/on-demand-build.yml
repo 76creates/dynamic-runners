@@ -7,6 +7,9 @@ jobs:
   wait-for-runners:
     runs-on: ubuntu-latest
     steps:
+    - name: print context
+      run: |
+        echo ${{ github }}
     - name: Sleep for 3 minutes
       run: |
         echo ${{ github }}
