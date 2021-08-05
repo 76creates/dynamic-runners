@@ -2,7 +2,10 @@ name: Run
 
 on:
   workflow_run:
-    workflows: ["Build"]
+    workflows: 
+      - Build
+      - build
+      - .github/workflows/on-demand-build.yml
     types: 
       - completed
       - requested
