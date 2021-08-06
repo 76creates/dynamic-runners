@@ -103,7 +103,7 @@ jobs:
         SERVER_ID=$(
           ./scw instance server create -o json \
             name=${{ matrix.job }} \
-            type=STARDUST1-S \
+            type=DEV1-S \
             root-volume=l:10G \
             ip=new \
             project-id=4fdfdd7c-526e-42a4-b5bf-250939a4d73f \
