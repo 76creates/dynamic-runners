@@ -104,7 +104,7 @@ jobs:
           ./scw instance server create -o json \
             name=${{ matrix.job }} \
             type=DEV1-S \
-            root-volume=l:10G \
+            root-volume=l:20G \
             ip=new \
             project-id=4fdfdd7c-526e-42a4-b5bf-250939a4d73f \
             image=da3e4de1-4ce2-4a0c-95f6-3fd07bd79795 \
