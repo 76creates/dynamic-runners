@@ -102,7 +102,7 @@ jobs:
 
   run-on-demand-1:
     needs: wait-for-runners
-    runs-on: "${{ github.run_id }}-run-on-demand"
+    runs-on: "${{ github.run_id }}-run-on-demand-1"
 
     steps:
     - name: Run on on-demand runner
@@ -112,7 +112,7 @@ jobs:
 
   run-on-demand-2:
     needs: wait-for-runners
-    runs-on: "${{ github.run_id }}-run-on-demand"
+    runs-on: "${{ github.run_id }}-run-on-demand-2"
 
     steps:
     - name: Run on on-demand runner
