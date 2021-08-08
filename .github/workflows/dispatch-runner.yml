@@ -85,7 +85,8 @@ jobs:
         --name ${{ matrix.job }} \
         --labels on-demand,${{ matrix.job }} \
         --work _work \
-        --token ${{ steps.runner.outputs.result }}ll
+        --token ${{ steps.runner.outputs.result }} \
+        --runnergroup "ephemeral"
         
         # this installs the service and runs it, must do as root
         cd /home/gitrun/runner/
