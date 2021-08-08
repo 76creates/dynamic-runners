@@ -64,20 +64,32 @@ jobs:
         go mod vendor
         go build -o scw cmd/scw/main.go
 
+    - name: init new runner 
+      id: runner
+      uses: actions/github-script@v4
+      with:
+        github-token: ${{ secrets.RUNNER_ACCESS_TOKEN }}
+        script: | 
+          let data = await github.request('POST /repos/{owner}/{repo}/actions/runners/registration-token', {
+            owner: '${{ github.repository_owner }}',
+            repo: 'dynamic-runners'
+          })
+          return data.data.token
+
     - name: gen cloud-init
       run: |
         cat << EOF >> cloud_init.sh
         #!/usr/bin/bash
-        export RUNNER_CFG_PAT='${{ secrets.RUNNER_ACCESS_TOKEN }}'
-
-        cd /home/gitrun/
-        curl -s https://raw.githubusercontent.com/actions/runner/main/scripts/create-latest-svc.sh | head -n -1 | 
-        bash -s ${{ github.repository }} "" "${{ matrix.job }}" gitrun on-demand,${{ matrix.job }}
-        unset RUNNER_CFG_PAT
+        sudo --user=gitrun /home/gitrun/actions-runner/config.sh \
+        --url https://github.com/${{ github.repository }} \
+        --name ${{ matrix.job }} \
+        --labels on-demand,${{ matrix.job }} \
+        --work _work \
+        --token ${{ steps.runner.outputs.result }}ll
         
-
-        sed -ie 's#./bin/RunnerService.js#./bin/RunnerService.js --once#' /home/gitrun/runner/runsvc.sh
-        cd /home/gitrun/runner && ./svc.sh start
+        # this installs the service and runs it, must do as root
+        cd /home/gitrun/actions-runner/
+        sudo --user=gitrun ./run.sh --once &
         EOF
 
     - name: create server and block until running
