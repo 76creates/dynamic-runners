@@ -106,7 +106,7 @@ jobs:
             root-volume=l:10G \
             ip=new \
             project-id=4fdfdd7c-526e-42a4-b5bf-250939a4d73f \
-            image=3509422f-cd45-41bd-948e-9d07c3fcee1f \
+            image=8331807c-487e-42a6-9964-3bd63430f020 \
             cloud-init="@$(pwd)/cloud_init.sh" | jq -r .id
         )
 
@@ -158,7 +158,7 @@ jobs:
               if (runner.data.status != "online"){
                   console.log(`::warning::runner id '${runnerId}' is '${runner.data.status}'`);
                   if (--iter) {
-                    await checkRunnerState(iter, id);
+                    return await checkRunnerState(iter, id);
                   } else {
                     return 1;
                   }

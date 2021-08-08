@@ -91,6 +91,7 @@ jobs:
             } else {
               await sleep(20000)
               if (--iter) {
+                console.log(runnersObj.data)
                 return await getRunner(iter);
               } else {
                 return 1;
@@ -98,7 +99,7 @@ jobs:
             };
           }
 
-          await getRunner(15);
+          return await getRunner(15);
 
   run-on-demand-1:
     needs: wait-for-runners
