@@ -71,9 +71,13 @@ jobs:
         export RUNNER_CFG_PAT='${{ secrets.RUNNER_ACCESS_TOKEN }}'
 
         cd /home/gitrun/
-        curl -s https://raw.githubusercontent.com/actions/runner/main/scripts/create-latest-svc.sh | 
+        curl -s https://raw.githubusercontent.com/actions/runner/main/scripts/create-latest-svc.sh | head -n -1 | 
         bash -s ${{ github.repository }} "" "${{ matrix.job }}" gitrun on-demand,${{ matrix.job }}
         unset RUNNER_CFG_PAT
+        
+
+        sed -ie 's#./bin/RunnerService.js#./bin/RunnerService.js --once#' /home/gitrun/runner/runsvc.sh
+        /home/gitrun/runner/svc.sh start
         EOF
 
     - name: create server and block until running
