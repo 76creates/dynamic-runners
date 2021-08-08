@@ -110,12 +110,12 @@ jobs:
         hostname
         echo "this is on-demand runner #1"
 
-  run-on-demand-2:
-    needs: wait-for-runners
-    runs-on: "${{ github.run_id }}-run-on-demand-2"
+  # run-on-demand-2:
+  #   needs: wait-for-runners
+  #   runs-on: "${{ github.run_id }}-run-on-demand-2"
 
-    steps:
-    - name: Run on on-demand runner
-      run: |
-        hostname
-        echo "this is on-demand runner #2"
+  #   steps:
+  #   - name: Run on on-demand runner
+  #     run: |
+  #       hostname
+  #       echo "this is on-demand runner #2"
