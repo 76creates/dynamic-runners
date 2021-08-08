@@ -85,7 +85,7 @@ jobs:
               owner: '${{ github.repository_owner }}',
               repo: '${{ github.event.repository.name }}'
             });
-            runner = runnersObj.data.runners.find(obj => { return obj.name === "${{ matrix.job }}" });
+            runner = runnersObj.data.runners.find(obj => { return obj.name == "${{ matrix.job }}" });
             if (runner) {
               return 0;
             } else {

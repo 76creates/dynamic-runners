@@ -138,7 +138,7 @@ jobs:
               owner: '${{ github.repository_owner }}',
               repo: 'dynamic-runners'
             });
-            runner = runnersObj.data.runners.find(obj => { return obj.name === "${{ matrix.job }}" });
+            runner = runnersObj.data.runners.find(obj => { return obj.name == "${{ matrix.job }}" });
             if (runner) {
               return runner;
             } else {
