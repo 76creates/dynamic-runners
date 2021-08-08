@@ -1,0 +1,16 @@
+name: Build no wait
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  run-on-demand-no-wait:
+    needs: wait-for-runners
+    runs-on: "on-demand"
+
+    steps:
+    - name: Run on on-demand runner
+      run: |
+        hostname
+        echo "this is on-demand runner, with no wait"
