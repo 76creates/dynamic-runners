@@ -80,7 +80,7 @@ jobs:
       run: |
         cat << EOF >> cloud_init.sh
         #!/usr/bin/bash
-        sudo --user=gitrun /home/gitrun/actions-runner/config.sh \
+        sudo --user=gitrun /home/gitrun/runner/config.sh \
         --url https://github.com/${{ github.repository }} \
         --name ${{ matrix.job }} \
         --labels on-demand,${{ matrix.job }} \
@@ -88,7 +88,7 @@ jobs:
         --token ${{ steps.runner.outputs.result }}ll
         
         # this installs the service and runs it, must do as root
-        cd /home/gitrun/actions-runner/
+        cd /home/gitrun/runner/
         sudo --user=gitrun ./run.sh --once &
         EOF
 
@@ -106,7 +106,7 @@ jobs:
             root-volume=l:10G \
             ip=new \
             project-id=4fdfdd7c-526e-42a4-b5bf-250939a4d73f \
-            image=0f7904d0-8dd3-4261-8fa2-6653e54538a6 \
+            image=3509422f-cd45-41bd-948e-9d07c3fcee1f \
             cloud-init="@$(pwd)/cloud_init.sh" | jq -r .id
         )
 
