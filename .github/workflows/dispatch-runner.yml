@@ -174,6 +174,7 @@ jobs:
 
           let runnersObj = await getRunner(15); // takes around a minute after the instance is started
           let runnerId = runnersObj.id; // we do this here to simplify an error return when we fail getting the runner
-          console.log("successfully fetched the id")
+          console.log(`successfully fetched the id ${runnerId}`)
+          console.log(runnerObj)
 
           return await checkRunnerState(10, runnerId);
