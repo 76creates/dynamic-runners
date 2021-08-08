@@ -140,10 +140,15 @@ jobs:
             });
             runner = runnersObj.data.runners.find(obj => { return obj.name == "${{ matrix.job }}" });
             if (runner) {
+              console.log(runner)
               return runner;
             } else {
               await sleep(5000)
-              if (--iter) return await getRunner(iter);
+              if (--iter) {
+                return await getRunner(iter);
+              } else {
+                return 1;
+              }
             };
           }
 
@@ -155,15 +160,15 @@ jobs:
                   repo: 'dynamic-runners',
                   runner_id: id
               });
-              if (runner.data.status != "online"){
-                  console.log(`::warning::runner id '${runnerId}' is '${runner.data.status}'`);
-                  if (--iter) {
-                    return await checkRunnerState(iter, id);
-                  } else {
-                    return 1;
-                  }
+              if (runner.data.status == "online"){
+                return 0;
               } else {
-                  return 0; 
+                console.log(`::warning::runner id '${runnerId}' is '${runner.data.status}'`);
+                if (--iter) {
+                  return await checkRunnerState(iter, id);
+                } else {
+                  return 1;
+                }
               };
           };
 
