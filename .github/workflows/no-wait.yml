@@ -6,7 +6,6 @@ on:
 
 jobs:
   run-on-demand-no-wait:
-    needs: wait-for-runners
     runs-on: "on-demand"
 
     steps:
