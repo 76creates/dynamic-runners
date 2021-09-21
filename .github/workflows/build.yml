@@ -1,7 +1,14 @@
 name: Build
 
+# this workflow will read the workflow file and wait for the runners
+# that are named ${{ github.run_id }}-$JOB_NAME to become availible
+# this is an example of dynamic runners using only workflow files
+# it also makes use of Dispatch Runner workflow to spawn runners
+
 on:
   push:
+    branches:
+      - "workflow-only-runner-dispatch"
   pull_request:
 
 jobs:
