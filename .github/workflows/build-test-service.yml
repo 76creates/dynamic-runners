@@ -5,7 +5,7 @@ on:
 
 jobs:
   build:
-    runs-on: "build"
+    runs-on: "on-demand"
 
     steps:
     - name: Run on on-demand runner
@@ -15,7 +15,7 @@ jobs:
 
   buildz:
     needs: build
-    runs-on: "build"
+    runs-on: "on-demand"
 
     steps:
     - name: Run on on-demand runner
