@@ -1,7 +1,9 @@
 name: Workflow Run Trigger
 
 on:
-  workflow_run:
+  workflow_job:
+    workflows: 
+      - Build
     types: 
       - completed
       - requested
