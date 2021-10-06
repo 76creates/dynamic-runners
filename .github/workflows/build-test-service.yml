@@ -5,7 +5,7 @@ on:
 
 jobs:
   build:
-    runs-on: "on-demand"
+    runs-on: "on-demand-scw"
 
     steps:
     - name: Run on on-demand runner
@@ -15,10 +15,10 @@ jobs:
 
   buildz:
     needs: build
-    runs-on: "on-demand"
+    runs-on: "on-demand-gcp"
 
     steps:
     - name: Run on on-demand runner
       run: |
         hostname
-        echo "this is on-demand runner #4"
+        echo "this is on-demand runner #2"
