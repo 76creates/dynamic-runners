@@ -4,14 +4,14 @@ on:
   push:
 
 jobs:
-  build:
-    runs-on: "on-demand-scw"
+  # build:
+  #   runs-on: "on-demand-scw"
 
-    steps:
-    - name: Run on on-demand runner
-      run: |
-        hostname
-        echo "this is on-demand runner #1"
+  #   steps:
+  #   - name: Run on on-demand runner
+  #     run: |
+  #       hostname
+  #       echo "this is on-demand runner #1"
 
   buildz:
     needs: build
