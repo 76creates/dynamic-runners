@@ -5,20 +5,20 @@ on:
 
 jobs:
   build:
+    runs-on: "on-demand-scw"
+
+    steps:
+      - name: Run on on-demand runner
+        run: |
+          hostname
+          echo "this is on-demand runner #1"
+
+  buildz:
+    needs: build
     runs-on: "on-demand-gcp"
 
     steps:
-    - name: Run on on-demand runner
-      run: |
-        hostname
-        echo "this is on-demand runner #5"
-
-  # buildz:
-  #   needs: build
-  #   runs-on: "on-demand-scw"
-
-  #   steps:
-  #   - name: Run on on-demand runner
-  #     run: |
-  #       hostname
-  #       echo "this is on-demand runner #4"
+      - name: Run on on-demand runner
+        run: |
+          hostname
+          echo "this is on-demand runner #2"
