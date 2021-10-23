@@ -17,8 +17,14 @@ jobs:
     needs: build
     runs-on: "gcp"
 
+    strategy:
+      matrix:
+        var:
+          - test
+          - test2
+
     steps:
       - name: Run on on-demand runner
         run: |
           hostname
-          echo "this is on-demand runner #10"
+          echo "this is on-demand runner ${{ matrix.var }}"
