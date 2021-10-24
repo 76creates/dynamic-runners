@@ -28,6 +28,9 @@ jobs:
 
     - name: watch the job
       run: |
+        ls -la
+        pwd
+
         echo ${{ secrets.RUNNER_CONF }} |
         ./gh-runner-ctl runner tend -d \
         --github-repo-name=dynamic-runners \
