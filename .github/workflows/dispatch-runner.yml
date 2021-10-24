@@ -2,179 +2,34 @@ name: Dispatch Runner
 on:
   workflow_run:
     workflows:
-      - Build
+      - BuildTest
     types: 
-      - completed
       - requested
 
 jobs:
-  generate-job-matrix:
-    if: ${{ github.event.action == 'requested' }}
-
+  tend:
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout
-      uses: actions/checkout@v2
+    - uses: actions/setup-go@v2
+      with:
+        go-version: '1.16.5'
 
-    - name: generate matrix
-      id: job-matrix
-      run: |
-        JOBS=$(
-          yq e -j ${{ github.event.workflow.path }} | 
-          jq '
-            .jobs | 
-            to_entries[] | 
-            if 
-              (.value."runs-on" | contains("github.run_id")) 
-            then 
-              "${{ github.event.workflow_run.id }}-\(.key)"
-            else 
-              empty 
-            end' | 
-          jq --slurp -c
-        )
-        echo $JOBS
-        echo "::set-output name=jobs::$JOBS"
-
-    outputs:
-      jobs: ${{ steps.job-matrix.outputs.jobs }}
-
-  spawn-runner:
-    needs: generate-job-matrix
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        job: ${{ fromJson(needs.generate-job-matrix.outputs.jobs) }}
-
-    steps:
-    - name: build SDK
+    - name: Checkout tools repo
       uses: actions/checkout@v2
       with:
-        repository: scaleway/scaleway-cli
+        repository: 76creates/gh-runner-ctl.git
 
-    - name: setup go
-      uses: actions/setup-go@v2
-      with:
-        go-version: '1.16.4'
-      
-      # we do this to bypass the issue https://github.com/scaleway/scaleway-cli/commit/3c87ff393104386e50542dad1b1c90c80c49cfa5
-    - name: make scw cli
+    - name: Build gh-runner-ctl
       run: |
         go mod tidy
         go mod vendor
-        go build -o scw cmd/scw/main.go
+        go build . -o gh-runner-ctl
 
-    - name: init new runner 
-      id: runner
-      uses: actions/github-script@v4
-      with:
-        github-token: ${{ secrets.RUNNER_ACCESS_TOKEN }}
-        script: | 
-          let data = await github.request('POST /repos/{owner}/{repo}/actions/runners/registration-token', {
-            owner: '${{ github.repository_owner }}',
-            repo: 'dynamic-runners'
-          })
-          return data.data.token
-
-    - name: gen cloud-init
+    - name: watch the job
       run: |
-        cat << EOF >> cloud_init.sh
-        #!/usr/bin/bash
-        sudo --user=gitrun /home/gitrun/runner/config.sh \
-        --url https://github.com/${{ github.repository }} \
-        --name ${{ matrix.job }} \
-        --labels on-demand,${{ matrix.job }} \
-        --work _work \
-        --token ${{ steps.runner.outputs.result }}
-        
-        # this installs the service and runs it, must do as root
-        cd /home/gitrun/runner/
-        sudo --user=gitrun ./run.sh --once &
-        EOF
-
-    - name: create server and block until running
-      run: |
-        export SCW_ACCESS_KEY=${{ secrets.SCW_ACCESS_KEY }}
-        export SCW_SECRET_KEY=${{ secrets.SCW_SECRET_KEY }}
-        export SCW_DEFAULT_ORGANIZATION_ID=${{ secrets.SCW_DEFAULT_ORGANIZATION_ID }}
-        export SCW_DEFAULT_PROJECT_ID=${{ secrets.SCW_DEFAULT_PROJECT_ID }}
-        export SCW_DEFAULT_ZONE=nl-ams-1
-        SERVER_ID=$(
-          ./scw instance server create -o json \
-            name=${{ matrix.job }} \
-            type=STARDUST1-S \
-            root-volume=l:10G \
-            ip=new \
-            project-id=4fdfdd7c-526e-42a4-b5bf-250939a4d73f \
-            image=8331807c-487e-42a6-9964-3bd63430f020 \
-            cloud-init="@$(pwd)/cloud_init.sh" | jq -r .id
-        )
-
-        # TODO: better error handling
-        [ -z $SERVER_ID ] &&
-        echo "::error::failed to spawn an server" && 
-        exit 1
-
-        for retry in {1..16}; do
-          STATE=$(./scw instance server get -o json ${SERVER_ID} | jq -r .state)
-           [ $STATE == "running" ] && 
-           exit 0
-           echo "::warning::'${SERVER_ID}' not running, in state '${STATE}', try ${retry}/16"
-           sleep 15
-        done
-        echo "::error:: runner '${SERVER_ID}'' has not started, timeout"
-        exit 1
-
-    - name: wait for runner to become idle
-      uses: actions/github-script@v4
-      with:
-        github-token: ${{ secrets.RUNNER_ACCESS_TOKEN }}
-        script: |
-          const sleep = m => new Promise(r => setTimeout(r, m));
-
-          // get runner ID with a retry 
-          const getRunner = async iter => {
-            let runnersObj = await github.request('GET /repos/{owner}/{repo}/actions/runners', {
-              owner: '${{ github.repository_owner }}',
-              repo: 'dynamic-runners'
-            });
-            runner = runnersObj.data.runners.find(obj => { return obj.name == "${{ matrix.job }}" });
-            if (runner) {
-              console.log(runner)
-              return runner;
-            } else {
-              await sleep(5000)
-              if (--iter) {
-                return await getRunner(iter);
-              } else {
-                return 1;
-              }
-            };
-          }
-
-          // get runner state with a retry
-          const checkRunnerState = async (iter, id) => {
-              await sleep(5000);
-              runner = await github.request('GET /repos/{owner}/{repo}/actions/runners/{runner_id}', {
-                  owner: '${{ github.repository_owner }}',
-                  repo: 'dynamic-runners',
-                  runner_id: id
-              });
-              if (runner.data.status == "online"){
-                return 0;
-              } else {
-                console.log(`::warning::runner id '${runnerId}' is '${runner.data.status}'`);
-                if (--iter) {
-                  return await checkRunnerState(iter, id);
-                } else {
-                  return 1;
-                }
-              };
-          };
-
-          let runnersObj = await getRunner(15); // takes around a minute after the instance is started
-          let runnerId = runnersObj.id; // we do this here to simplify an error return when we fail getting the runner
-          console.log(`successfully fetched the id ${runnerId}`)
-          console.log(runnersObj)
-
-          return await checkRunnerState(10, runnerId);
+        echo ${{ secrets.RUNNER_CONF }} |
+        gh-runner-ctl runner tend \
+        --github-repo-name=dynamic-runners \
+        --github-repo-owner=76creates \
+        --github-token=${{ secrets.REPO_TOKEN }} \
+        --github-workflow-run-id={{ github.sender.id }}

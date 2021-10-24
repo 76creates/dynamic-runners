@@ -1,4 +1,4 @@
-name: Build using script
+name: BuildTest
 
 on:
   push:
