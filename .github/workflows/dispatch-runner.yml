@@ -29,5 +29,4 @@ jobs:
 
     - name: watch the job
       run: |
-        echo ${{ secrets.RUNNER_CONF }} |
-        ./gh-runner-ctl runner tend -d --github-repo-name=dynamic-runners --github-repo-owner=76creates --github-token=${{ secrets.REPO_TOKEN }} --github-workflow-run-id=${{ github.event.workflow_run.id }}
+        echo ${{ secrets.RUNNER_CONF }} | ./gh-runner-ctl runner tend -d --github-repo-name=dynamic-runners --github-repo-owner=76creates --github-token=${{ secrets.REPO_TOKEN }} --github-workflow-run-id=${{ github.event.workflow_run.id }}
