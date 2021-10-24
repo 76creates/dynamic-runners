@@ -24,7 +24,7 @@ jobs:
       run: |
         go mod tidy
         go mod vendor
-        go build . -o gh-runner-ctl
+        go build -o gh-runner-ctl .
 
     - name: watch the job
       run: |
