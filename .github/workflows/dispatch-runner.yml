@@ -33,4 +33,4 @@ jobs:
         --github-repo-name=dynamic-runners \
         --github-repo-owner=76creates \
         --github-token=$${{ secrets.REPO_TOKEN }} \
-        --github-workflow-run-id=${{ github.sender.id }}
+        --github-workflow-run-id=${{ github.event.workflow_run.id }}
