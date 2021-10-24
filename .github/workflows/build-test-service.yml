@@ -21,7 +21,7 @@ jobs:
       matrix:
         var:
           - test
-          - test2
+          - test3
 
     steps:
       - name: Run on on-demand runner
