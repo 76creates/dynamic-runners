@@ -30,6 +30,7 @@ jobs:
     - name: watch the job
       env:
         RUNNER_CONFIG: ${{ secrets.RUNNER_CONF }}
+        REPO_TOKEN: ${{ secrets.REPO_TOKEN }}
       run: |
         ls -la
-        ./gh-runner-ctl runner tend -d --github-repo-name=dynamic-runners --github-repo-owner=76creates --github-token=${{ secrets.REPO_TOKEN }} --github-workflow-run-id=${{ github.event.workflow_run.id }} <<< $RUNNER_CONFIG
+        ./gh-runner-ctl runner tend -d --github-repo-name=dynamic-runners --github-repo-owner=76creates --github-token=$REPO_TOKEN --github-workflow-run-id=${{ github.event.workflow_run.id }} <<< $RUNNER_CONFIG
